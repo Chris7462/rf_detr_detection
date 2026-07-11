@@ -1,0 +1,19 @@
+rf_detr_detection_node:
+  ros__parameters:
+    # ROS parameters for the RF-DETR detection node
+    input_topic: "kitti/camera/color/left/image_raw"
+    output_topic: "rf_detr_detection"
+    output_overlay_topic: "rf_detr_detection_overlay"
+    queue_size: 5  # QoS parameter
+    processing_frequency: 50.0  # Hz
+    max_processing_queue_size: 3  # Maximum number of queued images
+    # Model parameters
+    engine_package: "rf_detr_trt_backend"  # Just put the package name here. The actual path will be constructed in the code.
+    engine_filename: "rf_detr_large_704x704.engine"
+    height: 704
+    width: 704
+    num_queries: 300
+    num_classes: 90
+    score_threshold: 0.5
+    warmup_iterations: 2 # Warmup iterations for better performance
+    log_level: 2  # 0: Internal Error, 1: Error , 2: Warning, 3: Info, 4: Verbose
