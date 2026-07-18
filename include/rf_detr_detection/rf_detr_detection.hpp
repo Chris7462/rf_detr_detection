@@ -65,6 +65,14 @@ private:
   fs::path engine_path_;
   std::string engine_filename_;
 
+  // Model input geometry, read back from detector_ via input_height()/
+  // input_width() immediately after construction in initialize_inferencer()
+  // (RFDetrTrtBackend::Config no longer carries height/width - they are
+  // resolved from the engine itself). process_image() uses these as the
+  // target size for letterbox_square().
+  int input_height_;
+  int input_width_;
+
   std::queue<sensor_msgs::msg::Image::SharedPtr> img_buff_;
   std::mutex mtx_;
   std::atomic<bool> processing_in_progress_;

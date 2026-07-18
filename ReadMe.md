@@ -48,14 +48,13 @@ Set in `param/rf_detr_detection.yaml`:
 | `max_processing_queue_size` | `3` | Bounded input queue; oldest frame is dropped when full |
 | `engine_package` | `rf_detr_trt_backend` | Package the engine file is resolved from |
 | `engine_filename` | `rf_detr_large_704x704.engine` | Engine file name, relative to `<engine_package>/share/engines` |
-| `height` / `width` | `704` / `704` | Model input size (must be equal - square input only) |
-| `num_queries` | `300` | Number of decoder queries |
-| `num_classes` | `90` | Foreground classes (excludes background) |
 | `score_threshold` | `0.5` | Minimum detection confidence |
 | `warmup_iterations` | `2` | Engine warmup passes at startup |
 | `log_level` | `2` | TensorRT log verbosity (0: Internal Error, 1: Error, 2: Warning, 3: Info, 4: Verbose) |
 
-To run against a fine-tuned checkpoint (e.g. a KITTI 3-class model), override `engine_filename` and `num_classes` to match.
+Model input size, decoder query count, and foreground class count are **not** parameters — `RFDetrTrtBackend` reads them directly from the loaded `.engine` file's own tensor shapes at construction time, and logs the resolved values at startup. This means they can never drift out of sync with whatever `engine_filename` actually points to.
+
+To run against a fine-tuned checkpoint (e.g. a KITTI 3-class model), just point `engine_filename` at it.
 
 ## Topics
 

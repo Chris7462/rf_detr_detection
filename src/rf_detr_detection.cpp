@@ -69,12 +69,6 @@ bool RfDetrDetection::initialize_parameters()
     engine_filename_ = declare_parameter("engine_filename",
       std::string("rf_detr_large_704x704.engine"));
 
-    // Model parameters. height/width must stay equal - RFDetrTrtBackend
-    // enforces this (windowed backbone attention has no non-square path).
-    config_.height = declare_parameter<int>("height", 704);
-    config_.width = declare_parameter<int>("width", 704);
-    config_.num_queries = declare_parameter<int>("num_queries", 300);
-    config_.num_classes = declare_parameter<int>("num_classes", 90);
     config_.score_threshold = declare_parameter<double>("score_threshold", 0.5);
     config_.warmup_iterations = declare_parameter<int>("warmup_iterations", 2);
     // 0: Internal Error, 1: Error, 2: Warning, 3: Info, 4: Verbose
@@ -99,6 +93,19 @@ bool RfDetrDetection::initialize_inferencer()
   try {
     detector_ = std::make_shared<rf_detr_trt_backend::RFDetrTrtBackend>(
       engine_path_.string(), config_);
+
+    // Model geometry is only known after the engine has been loaded -
+    // RFDetrTrtBackend resolves it from the engine's own tensor shapes
+    // during construction. Read it back here so process_image() has a
+    // target size to letterbox into.
+    input_height_ = detector_->input_height();
+    input_width_ = detector_->input_width();
+
+    RCLCPP_INFO(get_logger(),
+      "Engine loaded: input %dx%d, %d queries, %d classes",
+      input_height_, input_width_,
+      detector_->num_queries(), detector_->num_classes());
+
     return true;
 
   } catch (const std::exception & e) {
@@ -234,11 +241,12 @@ rf_detr_trt_backend::Detections RfDetrDetection::process_image(const cv::Mat & i
   }
 
   try {
-    // config_.height == config_.width (enforced by RFDetrTrtBackend's
-    // constructor) - letterbox_square() pads/resizes to that square size.
+    // input_height_ == input_width_ (enforced by RFDetrTrtBackend's
+    // constructor, which throws if the loaded engine's input is non-square)
+    // - letterbox_square() pads/resizes to that square size.
     rf_detr_trt_backend::utils::LetterboxInfo info;
     cv::Mat padded = rf_detr_trt_backend::utils::letterbox_square(
-      input_image, config_.width, &info);
+      input_image, input_width_, &info);
 
     rf_detr_trt_backend::Detections detections_padded = detector_->infer(padded);
 
