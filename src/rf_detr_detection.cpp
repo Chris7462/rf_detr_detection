@@ -52,8 +52,15 @@ bool RfDetrDetection::initialize_parameters()
 {
   try {
     // ROS2 parameters
-    input_topic_ = declare_parameter("input_topic",
-      std::string("kitti/camera/color/left/image_raw"));
+    input_topic_ = declare_parameter("input_topic", std::string(""));
+    if (input_topic_.empty()) {
+      RCLCPP_ERROR(get_logger(),
+        "input_topic is empty. This must be remapped by the launch file "
+        "(e.g. input_topic:=/carla/hero/cam2/image) - refusing to start "
+        "with an unspecified input source.");
+      return false;
+    }
+
     output_topic_ = declare_parameter("output_topic", std::string("rf_detr_detection"));
     output_overlay_topic_ = declare_parameter("output_overlay_topic",
       std::string("rf_detr_detection_overlay"));

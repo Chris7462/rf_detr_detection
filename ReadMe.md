@@ -6,7 +6,7 @@ The node subscribes to an image topic, letterbox-pads each frame to the model's 
 
 ## Dependencies
 
-- ROS2 (tested with Jazzy)
+- ROS2 (tested with Lyrical)
 - [`rf_detr_trt_backend`](https://github.com/Chris7462/rf_detr_trt_backend) — must be built first; this package links against it and expects a compiled `.engine` file under its `share/engines` directory
 - `rclcpp`, `sensor_msgs`, `vision_msgs`, `ament_index_cpp`, `cv_bridge`
 
@@ -20,19 +20,17 @@ source install/setup.bash
 
 ## Run
 
+### KITTI data (raw bag)
 ```bash
-ros2 launch rf_detr_detection rf_detr_detection_launch.py
+ros2 launch rf_detr_detection rf_detr_detection_kitti_launch.py
 ```
 
-### With RViz + KITTI Bag Playback
-
-A second launch file starts RViz and replays a KITTI rosbag with QoS overrides for consistent playback:
-
+### CARLA simulator
 ```bash
-ros2 launch rf_detr_detection rf_detr_detection_rviz_launch.py
+ros2 launch rf_detr_detection rf_detr_detection_carla_launch.py
 ```
 
-This plays `/data/kitti/raw/2011_09_29_drive_0071_sync_bag` at real-time rate; update the bag path in `launch/rf_detr_detection_rviz_launch.py` to point at your own data.
+This plays `/data/kitti/raw/2011_09_29_drive_0071_sync_bag` at real-time rate; update the bag path in `launch/rf_detr_detection_kitti_launch.py` to point at your own data.
 
 ## Parameters
 
